@@ -1,8 +1,5 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+package com.example.cs4076_server;
+
 import java.io.*;
 import java.net.*;
 
@@ -12,7 +9,7 @@ import java.net.*;
  */
 public class TCPEchoServer { 
   private static ServerSocket servSock;
-  private static final int PORT = 1234;
+  private static final int PORT = 12340;
   private static int clientConnections = 0;
 
   public static void main(String[] args) {
