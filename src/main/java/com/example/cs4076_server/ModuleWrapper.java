@@ -2,6 +2,8 @@ package com.example.cs4076_server;
 
 import org.json.simple.JSONObject;
 
+import java.time.LocalTime;
+
 public class ModuleWrapper {
 
     private JSONObject data;
@@ -18,12 +20,12 @@ public class ModuleWrapper {
         return data.get("dayOfWeek").toString();
     }
 
-    public String getStartTime() {
-        return data.get("startTime").toString();
+    public LocalTime getStartTime() {
+        return (LocalTime) data.get("startTime");
     }
 
-    public String getEndTime() {
-        return data.get("endTime").toString();
+    public LocalTime getEndTime() {
+        return (LocalTime) data.get("endTime");
     }
 
     public String getRoomNumber() {
@@ -31,6 +33,11 @@ public class ModuleWrapper {
     }
 
     public boolean overlaps(ModuleWrapper newModule) {
-        return true;
+        if (newModule.getDayOfWeek().equals(this.getDayOfWeek())) {
+            boolean startOverlaps = newModule.getStartTime().compareTo(this.getStartTime()) >= 0 && newModule.getStartTime().compareTo(this.getEndTime()) <= 0;
+            boolean endOverlaps = newModule.getEndTime().compareTo(this.getStartTime()) >= 0 && newModule.getEndTime().compareTo(this.getEndTime()) <= 0;
+            return startOverlaps || endOverlaps;
+        }
+        return false;
     }
 }
