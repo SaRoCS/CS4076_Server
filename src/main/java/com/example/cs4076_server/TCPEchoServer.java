@@ -1,6 +1,7 @@
 package com.example.cs4076_server;
 
 import org.json.simple.JSONObject;
+
 import java.io.*;
 import java.net.*;
 import java.time.LocalTime;
@@ -33,14 +34,18 @@ public class TCPEchoServer {
         try {
             link = servSock.accept();               //Step 2.
             clientConnections++;
+            while (true) {
+                ObjectInputStream in = new ObjectInputStream(link.getInputStream());
+                ObjectOutputStream out = new ObjectOutputStream(link.getOutputStream());
 
-            ObjectInputStream in = new ObjectInputStream(link.getInputStream());
-            ObjectOutputStream out = new ObjectOutputStream(link.getOutputStream());
-
-            JSONObject obj = (JSONObject) in.readObject();
-            JSONObject res = new JSONObject();
-            res.put("response", obj.get("name").toString().toUpperCase());
-            out.writeObject(res);
+                JSONObject obj = (JSONObject) in.readObject();
+                JSONObject data = (JSONObject) obj.get("data");
+                JSONObject res = new JSONObject();
+                res.put("response", data.get("name").toString().toUpperCase());
+                out.writeObject(res);
+            }
+        } catch (EOFException e) {
+            // Client disconnect
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         } finally {
