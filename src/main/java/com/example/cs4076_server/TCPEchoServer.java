@@ -1,10 +1,15 @@
 package com.example.cs4076_server;
 
+
 import org.json.simple.JSONObject;
 
-import java.io.*;
-import java.net.*;
-import java.time.LocalTime;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
 
 /**
  * @author razi
@@ -40,6 +45,22 @@ public class TCPEchoServer {
 
                 JSONObject obj = (JSONObject) in.readObject();
                 JSONObject data = (JSONObject) obj.get("data");
+
+                ModuleWrapper curModule = new ModuleWrapper(data);
+                ArrayList<ModuleWrapper> moduleArray = new ArrayList<ModuleWrapper>();
+                //Adding Module to Array (Still Needs Exceptions)
+                if(obj.get("action").equals("Add Class")) {
+                    moduleArray.add(curModule);
+                }
+                //Removing Module from Array (Still Needs Exceptions)
+                if(obj.get("action").equals("Remove Class")) {
+                    for(int i = 0; i < moduleArray.size(); i++) {
+                        if(moduleArray.get(i).equals(curModule)) {
+                            moduleArray.remove(i);
+                        }
+                    }
+                }
+
                 JSONObject res = new JSONObject();
                 res.put("response", data.get("name").toString().toUpperCase());
                 out.writeObject(res);
