@@ -40,4 +40,13 @@ public class ModuleWrapper {
         }
         return false;
     }
+
+    public boolean equals(ModuleWrapper newModule) {
+        if(newModule.getName().equals(this.getName()) && newModule.getDayOfWeek().equals(this.getDayOfWeek()) &&
+                newModule.getStartTime().equals(this.getStartTime()) && newModule.getStartTime().equals(this.getStartTime()) &&
+                newModule.getEndTime().equals(this.getEndTime()) && newModule.getRoomNumber().equals(this.getRoomNumber())) {
+            return true;
+        }
+        return false;
+    }
 }
