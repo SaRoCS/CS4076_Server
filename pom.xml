@@ -36,7 +36,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>com.example.cs4076_server.TCPEchoServer</mainClass>
+                    <mainClass>com.example.cs4076_server.TCPServer</mainClass>
                 </configuration>
             </plugin>
         </plugins>
