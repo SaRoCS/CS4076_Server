@@ -29,7 +29,7 @@ public class ModuleWrapper {
     }
 
     public String getRoomNumber() {
-        return data.get("roomNUmber").toString();
+        return data.get("roomNumber").toString();
     }
 
     public boolean overlaps(ModuleWrapper newModule) {
