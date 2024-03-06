@@ -1,8 +1,5 @@
 package com.example.cs4076_server;
 
-
-package com.CS4076.TCPServer;
-
 import org.json.simple.JSONObject;
 
 import java.io.EOFException;
@@ -18,9 +15,9 @@ import java.util.ArrayList;
  */
 public class TCPEchoServer {
     private static final int PORT = 1234;
+    private static final ArrayList<ModuleWrapper> moduleArray = new ArrayList<ModuleWrapper>();
     private static ServerSocket servSock;
     private static int clientConnections = 0;
-    private static final ArrayList<ModuleWrapper> moduleArray = new ArrayList<ModuleWrapper>();
 
     public static void main(String[] args) {
         System.out.println("Opening port...\n");
@@ -76,9 +73,10 @@ public class TCPEchoServer {
     } // finish run method
 
     private static String processMsg(String action, JSONObject data) throws IncorrectActionException {
+        String response = "";
         if (action.equals("Display Schedule")) {
             //displaySchedule();
-            return "Schedule displayed";
+            response = "Schedule displayed";
         } else {
             if (action.equals("Add Class") || action.equals("Remove Class")) {
                 if (data == null) {
@@ -87,27 +85,34 @@ public class TCPEchoServer {
 
                 ModuleWrapper curModule = new ModuleWrapper(data);
 
+                if (curModule.getStartTime().isAfter(curModule.getEndTime()) || curModule.getStartTime().equals(curModule.getEndTime())) {
+                    throw new IncorrectActionException("Start time must be before end time.");
+                }
+
                 if (action.equals("Add Class")) {
-                    for(int i = 0; i < moduleArray.size(); i++) {
-                        if(moduleArray.get(i).equals(curModule)) {
-                            throw new IncorrectActionException("Cannot " + action +". Class already exists.");
+                    for (int i = 0; i < moduleArray.size(); i++) {
+                        if (moduleArray.get(i).equals(curModule)) {
+                            response = "Cannot add class. Class already exists.";
+                        } else if (moduleArray.get(i).overlaps((curModule))) {
+                            response = "Cannot add class. Class overlaps with existing class.";
                         }
                     }
                     moduleArray.add(curModule);
-                    return "Class Added";
+                    response = "Class successfully added.";
                 } else if (action.equals("Remove Class")) {
+                    response = "Cannot remove class. Class doesn't exist";
                     for (int i = 0; i < moduleArray.size(); i++) {
                         if (moduleArray.get(i).equals(curModule)) {
                             moduleArray.remove(i);
-                            return "Class Removed";
+                            response = "Class Removed";
                         }
                     }
-                    throw new IncorrectActionException("Cannot " + action + ". Class doesn't exist");
+
                 }
-                return "Incomplete";
             } else {
                 throw new IncorrectActionException("Unknown action.");
             }
         }
+        return response;
     }
 } // finish the class

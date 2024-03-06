@@ -6,7 +6,7 @@ import java.time.LocalTime;
 
 public class ModuleWrapper {
 
-    private JSONObject data;
+    private final JSONObject data;
 
     public ModuleWrapper(JSONObject data) {
         this.data = data;
@@ -34,19 +34,21 @@ public class ModuleWrapper {
 
     public boolean overlaps(ModuleWrapper newModule) {
         if (newModule.getDayOfWeek().equals(this.getDayOfWeek())) {
-            boolean startOverlaps = newModule.getStartTime().compareTo(this.getStartTime()) >= 0 && newModule.getStartTime().compareTo(this.getEndTime()) <= 0;
-            boolean endOverlaps = newModule.getEndTime().compareTo(this.getStartTime()) >= 0 && newModule.getEndTime().compareTo(this.getEndTime()) <= 0;
+            boolean startOverlaps = !newModule.getStartTime().isBefore(this.getStartTime()) && !newModule.getStartTime().isAfter(this.getEndTime());
+            boolean endOverlaps = !newModule.getEndTime().isBefore(this.getStartTime()) && !newModule.getEndTime().isAfter(this.getEndTime());
             return startOverlaps || endOverlaps;
         }
         return false;
     }
 
-    public boolean equals(ModuleWrapper newModule) {
-        if(newModule.getName().equals(this.getName()) && newModule.getDayOfWeek().equals(this.getDayOfWeek()) &&
-                newModule.getStartTime().equals(this.getStartTime()) && newModule.getStartTime().equals(this.getStartTime()) &&
-                newModule.getEndTime().equals(this.getEndTime()) && newModule.getRoomNumber().equals(this.getRoomNumber())) {
-            return true;
+    @Override
+    public boolean equals(Object o) {
+        if ((o == null) || (o.getClass() != this.getClass())) {
+            return false;
         }
-        return false;
+
+        ModuleWrapper other = (ModuleWrapper) o;
+
+        return other.getName().equals(this.getName()) && other.getDayOfWeek().equals(this.getDayOfWeek()) && other.getStartTime().equals(this.getStartTime()) && other.getStartTime().equals(this.getStartTime()) && other.getEndTime().equals(this.getEndTime()) && other.getRoomNumber().equals(this.getRoomNumber());
     }
 }
