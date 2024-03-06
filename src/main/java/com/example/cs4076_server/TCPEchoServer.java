@@ -1,6 +1,8 @@
 package com.example.cs4076_server;
 
 
+package com.CS4076.TCPServer;
+
 import org.json.simple.JSONObject;
 
 import java.io.EOFException;
@@ -86,13 +88,21 @@ public class TCPEchoServer {
                 ModuleWrapper curModule = new ModuleWrapper(data);
 
                 if (action.equals("Add Class")) {
+                    for(int i = 0; i < moduleArray.size(); i++) {
+                        if(moduleArray.get(i).equals(curModule)) {
+                            throw new IncorrectActionException("Cannot " + action +". Class already exists.");
+                        }
+                    }
                     moduleArray.add(curModule);
+                    return "Class Added";
                 } else if (action.equals("Remove Class")) {
                     for (int i = 0; i < moduleArray.size(); i++) {
                         if (moduleArray.get(i).equals(curModule)) {
                             moduleArray.remove(i);
+                            return "Class Removed";
                         }
                     }
+                    throw new IncorrectActionException("Cannot " + action + ". Class doesn't exist");
                 }
                 return "Incomplete";
             } else {
