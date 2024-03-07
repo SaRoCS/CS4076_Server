@@ -7,7 +7,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.DayOfWeek;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 /**
  * The TCP server application to manage scheduling classes
@@ -114,7 +116,7 @@ public class TCPServer {
     private static String processMsg(String action, JSONObject data) throws IncorrectActionException {
         String response = "";
         if (action.equals("Display Schedule")) {
-            //displaySchedule();
+            displaySchedule();
             response = "Schedule displayed";
         } else {
             if (action.equals("Add Class") || action.equals("Remove Class")) {
@@ -146,7 +148,31 @@ public class TCPServer {
                     }
                     if (canAdd) {
                         moduleArray.add(curModule);
-                        response = "Class successfully added.";
+
+                        // sort the array by day then time
+                        moduleArray.sort(new Comparator<ModuleWrapper>() {
+                            @Override
+                            public int compare(ModuleWrapper o1, ModuleWrapper o2) {
+
+                                if (o1.equals(o2)) {
+                                    return 0;
+                                }
+
+                                int dayCompare = DayOfWeek.valueOf(o1.getDayOfWeek()).compareTo(DayOfWeek.valueOf(o2.getDayOfWeek()));
+                                if (dayCompare > 0) {
+                                    return 1;
+                                } else if (dayCompare < 0) {
+                                    return -1;
+                                } else {
+                                    if (o1.getStartTime().isBefore(o2.getStartTime())) {
+                                        return -1;
+                                    } else {
+                                        return 1;
+                                    }
+                                }
+                            }
+                        });
+                        response = curModule.getName() + " at " + curModule.getStartTime() + " successfully added.";
                     }
                 } else if (action.equals("Remove Class")) {
                     // Find the class and delete it if it exists
@@ -166,5 +192,13 @@ public class TCPServer {
         return response;
     }
 
+    /**
+     * Displays the created schedule in the terminal
+     */
+    private static void displaySchedule() {
+        for (ModuleWrapper module : moduleArray) {
+            System.out.println(module.getDayOfWeek() + " " + module.getStartTime() + " " + module.getName());
+        }
+    }
 
 }
