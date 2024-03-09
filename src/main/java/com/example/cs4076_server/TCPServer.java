@@ -1,7 +1,11 @@
 package com.example.cs4076_server;
-
+/**
+ * JSON package
+ */
 import org.json.simple.JSONObject;
-
+/**
+ * Other Java packages
+ */
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -13,6 +17,9 @@ import java.util.Comparator;
 
 /**
  * The TCP server application to manage scheduling classes
+ *
+ * @author Westin Gjervold
+ * @author Samuel Schroeder
  */
 public class TCPServer {
     /**
@@ -196,9 +203,13 @@ public class TCPServer {
      * Displays the created schedule in the terminal
      */
     private static void displaySchedule() {
+        System.out.println("SCHEDULE:");
+        System.out.printf("Day         Time        Class       Name        Room Number\n");
+        System.out.println("-------------------------------------------------------------------");
         for (ModuleWrapper module : moduleArray) {
-            System.out.println(module.getDayOfWeek() + " " + module.getStartTime() + " " + module.getName());
+            System.out.printf("%-12s%-12s%-12s%-12s%-12s\n", module.getDayOfWeek(), module.getStartTime(),
+                    module.getEndTime(), module.getName(), module.getRoomNumber());
         }
+        System.out.println();
     }
-
 }
