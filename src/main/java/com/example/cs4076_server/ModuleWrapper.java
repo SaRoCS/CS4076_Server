@@ -5,7 +5,7 @@ import org.json.simple.JSONObject;
 import java.time.LocalTime;
 
 /**
- * A univeristy module
+ * A university module
  */
 public class ModuleWrapper {
 
@@ -81,7 +81,9 @@ public class ModuleWrapper {
             boolean startOverlaps = newModule.getStartTime().isAfter(this.getStartTime()) && newModule.getStartTime().isBefore(this.getEndTime());
             // Is the end time in the window of this module
             boolean endOverlaps = newModule.getEndTime().isAfter(this.getStartTime()) && newModule.getEndTime().isBefore(this.getEndTime());
-            return startOverlaps || endOverlaps;
+            // Are the times the same
+            boolean totalOverlap = newModule.getStartTime().equals(this.getStartTime()) && newModule.getEndTime().equals(this.getEndTime());
+            return startOverlaps || endOverlaps || totalOverlap;
         }
         return false;
     }
