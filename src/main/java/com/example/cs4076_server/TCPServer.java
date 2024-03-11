@@ -6,14 +6,15 @@ import org.json.simple.JSONObject;
 /**
  * Other Java packages
  */
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.*;
+import java.security.cert.CertificateException;
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Comparator;
+import javax.net.ssl.*;
 
 /**
  * The TCP server application to manage scheduling classes
@@ -36,10 +37,48 @@ public class TCPServer {
     private static ServerSocket servSock;
 
     public static void main(String[] args) {
-        // Create the TCP socket
+
         System.out.println("Opening port...\n");
+
+        char[] password = "cs4076".toCharArray();
+        SSLServerSocketFactory sslServerSocketFactory = null;
+
         try {
-            servSock = new ServerSocket(PORT);
+            // Load the server's key from the key store file
+            KeyStore keyStore = KeyStore.getInstance("JKS");
+            InputStream inputStream = new FileInputStream("server_keystore.jks");
+            keyStore.load(inputStream, password);
+
+            // Create key manager
+            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            keyManagerFactory.init(keyStore, password);
+
+            // Create SSL factory
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(keyManagerFactory.getKeyManagers(), null, null);
+            sslServerSocketFactory = sslContext.getServerSocketFactory();
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        } catch (UnrecoverableKeyException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            // Creat SSL socket
+            servSock = sslServerSocketFactory.createServerSocket(PORT);
+        } catch (NullPointerException e) {
+            System.out.println("Unable to create SSL connection!");
+            System.exit(1);
         } catch (IOException e) {
             System.out.println("Unable to attach to port!");
             System.exit(1);
