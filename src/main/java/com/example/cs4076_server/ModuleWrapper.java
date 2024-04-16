@@ -47,7 +47,7 @@ public class ModuleWrapper {
      * @return The start time
      */
     public LocalTime getStartTime() {
-        return (LocalTime) data.get("startTime");
+        return LocalTime.parse(data.get("startTime").toString());
     }
 
     /**
@@ -56,7 +56,7 @@ public class ModuleWrapper {
      * @return The end time
      */
     public LocalTime getEndTime() {
-        return (LocalTime) data.get("endTime");
+        return LocalTime.parse(data.get("endTime").toString());
     }
 
     /**
@@ -99,5 +99,10 @@ public class ModuleWrapper {
 
         // Compare the data fields
         return other.getName().equals(this.getName()) && other.getDayOfWeek().equals(this.getDayOfWeek()) && other.getStartTime().equals(this.getStartTime()) && other.getStartTime().equals(this.getStartTime()) && other.getEndTime().equals(this.getEndTime()) && other.getRoomNumber().equals(this.getRoomNumber());
+    }
+
+    @Override
+    public String toString() {
+        return data.toJSONString();
     }
 }

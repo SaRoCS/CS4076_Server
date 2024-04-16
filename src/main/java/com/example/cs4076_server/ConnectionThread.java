@@ -95,8 +95,8 @@ class ConnectionThread implements Runnable {
     private String processMsg(String action, JSONObject data) throws IncorrectActionException {
         String response = "";
         if (action.equals("Display Schedule")) {
-            displaySchedule();
-            response = "Schedule displayed";
+            response = displaySchedule();
+            //response = "Schedule displayed";
         } else if (action.equals("Add Class") || action.equals("Remove Class")) {
             // Class data is required for adding and removing
             if (data == null) {
@@ -124,7 +124,7 @@ class ConnectionThread implements Runnable {
     /**
      * Displays the created schedule in the terminal
      */
-    private void displaySchedule() {
+    private String displaySchedule() {
         System.out.println("SCHEDULE:");
         System.out.print("Day         Start       End         Name        Room Number\n");
         System.out.println("-------------------------------------------------------------------");
@@ -134,6 +134,7 @@ class ConnectionThread implements Runnable {
             }
         }
         System.out.println();
+        return JSONObject.toJSONString(schedule);
     }
 
     /**
