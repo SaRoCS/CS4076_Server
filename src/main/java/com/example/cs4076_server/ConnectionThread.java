@@ -8,19 +8,24 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.time.DayOfWeek;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 class ConnectionThread implements Runnable {
     private final Socket link;
-    private final CopyOnWriteArrayList<ModuleWrapper> moduleArray;
+    private final ConcurrentHashMap<String, CopyOnWriteArrayList<ModuleWrapper>> schedule;
 
-    public ConnectionThread(Socket link, CopyOnWriteArrayList<ModuleWrapper> moduleArray) {
+    public ConnectionThread(Socket link, ConcurrentHashMap<String, CopyOnWriteArrayList<ModuleWrapper>> schedule) {
         this.link = link;
-        this.moduleArray = moduleArray;
+        this.schedule = schedule;
     }
 
     @Override
     public void run() {
+        for (DayOfWeek day : DayOfWeek.values()) {
+            schedule.put(day.toString(), new CopyOnWriteArrayList<>());
+        }
+
         try {
             while (true) {
                 // Get I/O streams for sending and receiving objects
@@ -123,8 +128,10 @@ class ConnectionThread implements Runnable {
         System.out.println("SCHEDULE:");
         System.out.print("Day         Start       End         Name        Room Number\n");
         System.out.println("-------------------------------------------------------------------");
-        for (ModuleWrapper module : moduleArray) {
-            System.out.printf("%-12s%-12s%-12s%-12s%-12s\n", module.getDayOfWeek(), module.getStartTime(), module.getEndTime(), module.getName(), module.getRoomNumber());
+        for (DayOfWeek day : DayOfWeek.values()) {
+            for (ModuleWrapper module : schedule.get(day.toString())) {
+                System.out.printf("%-12s%-12s%-12s%-12s%-12s\n", module.getDayOfWeek(), module.getStartTime(), module.getEndTime(), module.getName(), module.getRoomNumber());
+            }
         }
         System.out.println();
     }
@@ -138,6 +145,7 @@ class ConnectionThread implements Runnable {
     private String addClass(ModuleWrapper newModule) {
         String result = "";
         boolean canAdd = true;
+        CopyOnWriteArrayList<ModuleWrapper> moduleArray = schedule.get(newModule.getDayOfWeek());
 
         // Check each existing module to see if this new module already exists or clashes with an existing module
         for (ModuleWrapper moduleWrapper : moduleArray) {
@@ -190,6 +198,7 @@ class ConnectionThread implements Runnable {
     private String removeClass(ModuleWrapper newModule) {
         // Find the class and delete it if it exists
         String response = "Cannot remove class. Class doesn't exist";
+        CopyOnWriteArrayList<ModuleWrapper> moduleArray = schedule.get(newModule.getDayOfWeek());
         for (int i = 0; i < moduleArray.size(); i++) {
             if (moduleArray.get(i).equals(newModule)) {
                 moduleArray.remove(i);

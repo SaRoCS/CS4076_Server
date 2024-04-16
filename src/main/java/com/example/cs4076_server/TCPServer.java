@@ -10,6 +10,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -26,7 +27,7 @@ public class TCPServer {
     /**
      * An array to store the scheduled classes
      */
-    private static final CopyOnWriteArrayList<ModuleWrapper> moduleArray = new CopyOnWriteArrayList<>();
+    private static final ConcurrentHashMap<String, CopyOnWriteArrayList<ModuleWrapper>> schedule = new ConcurrentHashMap<>();
     /**
      * The server's socket
      */
@@ -57,7 +58,7 @@ public class TCPServer {
         Socket link = null;
         try {
             link = servSock.accept();
-            Thread worker = new Thread(new ConnectionThread(link, moduleArray));
+            Thread worker = new Thread(new ConnectionThread(link, schedule));
             worker.start();
         } catch (IOException e) {
             e.printStackTrace();
