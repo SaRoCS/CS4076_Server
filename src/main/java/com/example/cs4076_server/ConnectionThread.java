@@ -1,5 +1,6 @@
 package com.example.cs4076_server;
 
+import javafx.application.Platform;
 import org.json.simple.JSONObject;
 
 import java.io.IOException;
@@ -10,10 +11,13 @@ import java.net.SocketException;
 import java.time.DayOfWeek;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 class ConnectionThread implements Runnable {
     private final Socket link;
     private final ConcurrentHashMap<String, CopyOnWriteArrayList<ModuleWrapper>> schedule;
+    private String earlyLectureStatus = "Not Started";
 
     public ConnectionThread(Socket link, ConcurrentHashMap<String, CopyOnWriteArrayList<ModuleWrapper>> schedule) {
         this.link = link;
@@ -25,6 +29,9 @@ class ConnectionThread implements Runnable {
         for (DayOfWeek day : DayOfWeek.values()) {
             schedule.put(day.toString(), new CopyOnWriteArrayList<>());
         }
+
+        Platform.startup(() -> {
+        });
 
         try {
             while (true) {
@@ -51,6 +58,7 @@ class ConnectionThread implements Runnable {
                 // Send the response
                 JSONObject res = new JSONObject();
                 res.put("response", resMsg);
+                res.put("earlyLectureStatus", earlyLectureStatus);
                 out.writeObject(res);
 
                 // Close the connection if requested
@@ -81,6 +89,7 @@ class ConnectionThread implements Runnable {
                 System.out.println("Unable to disconnect!");
                 System.exit(1);
             }
+            Platform.exit();
         }
     }
 
@@ -115,6 +124,17 @@ class ConnectionThread implements Runnable {
             } else if (action.equals("Remove Class")) {
                 response = removeClass(newModule);
             }
+        } else if (action.equals("Early Lectures")) {
+            EarlyLecturesTask task = new EarlyLecturesTask(schedule);
+            task.setOnSucceeded(e -> {
+                earlyLectureStatus = "Finished";
+            });
+            ExecutorService executorService = Executors.newFixedThreadPool(1);
+            executorService.execute(task);
+            executorService.shutdown();
+
+            earlyLectureStatus = "Started";
+            response = "Early lectures task started";
         } else {
             throw new IncorrectActionException("Unknown action.");
         }

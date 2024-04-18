@@ -2,6 +2,7 @@ package com.example.cs4076_server;
 
 import org.json.simple.JSONObject;
 
+import java.time.Duration;
 import java.time.LocalTime;
 
 /**
@@ -66,6 +67,12 @@ public class ModuleWrapper {
      */
     public String getRoomNumber() {
         return data.get("roomNumber").toString();
+    }
+
+    public void shiftTime(LocalTime newStart) {
+        long offset = Duration.between(newStart, getStartTime()).toHours();
+        data.put("startTime", getStartTime().minusHours(offset).toString());
+        data.put("endTime", getEndTime().minusHours(offset).toString());
     }
 
     /**
