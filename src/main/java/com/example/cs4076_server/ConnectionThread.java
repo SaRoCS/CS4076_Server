@@ -14,9 +14,21 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * A runnable object for handling a single connection
+ */
 class ConnectionThread implements Runnable {
+    /**
+     * The link this thread is managing
+     */
     private final Socket link;
+    /**
+     * The server's shared schedule
+     */
     private final ConcurrentHashMap<String, CopyOnWriteArrayList<ModuleWrapper>> schedule;
+    /**
+     * The status of the early lectures task
+     */
     private String earlyLectureStatus = "Not Started";
 
     public ConnectionThread(Socket link, ConcurrentHashMap<String, CopyOnWriteArrayList<ModuleWrapper>> schedule) {
@@ -26,10 +38,7 @@ class ConnectionThread implements Runnable {
 
     @Override
     public void run() {
-        for (DayOfWeek day : DayOfWeek.values()) {
-            schedule.put(day.toString(), new CopyOnWriteArrayList<>());
-        }
-
+        // To use javafx.concurrent, the JFX runtime must be started
         Platform.startup(() -> {
         });
 
@@ -89,6 +98,7 @@ class ConnectionThread implements Runnable {
                 System.out.println("Unable to disconnect!");
                 System.exit(1);
             }
+            // Stop the JFX runtime
             Platform.exit();
         }
     }
@@ -125,10 +135,14 @@ class ConnectionThread implements Runnable {
                 response = removeClass(newModule);
             }
         } else if (action.equals("Early Lectures")) {
+            // Create a task using javafx.concurrent to decouple computation
             EarlyLecturesTask task = new EarlyLecturesTask(schedule);
             task.setOnSucceeded(e -> {
+                // Update the status
                 earlyLectureStatus = "Finished";
             });
+
+            // Run the task
             ExecutorService executorService = Executors.newFixedThreadPool(1);
             executorService.execute(task);
             executorService.shutdown();
@@ -142,7 +156,7 @@ class ConnectionThread implements Runnable {
     }
 
     /**
-     * Displays the created schedule in the terminal
+     * Displays the created schedule in the terminal and returns a JSON string of the schedule to be sent to the client
      */
     private String displaySchedule() {
         System.out.println("SCHEDULE:");

@@ -70,7 +70,9 @@ public class ModuleWrapper {
     }
 
     public void shiftTime(LocalTime newStart) {
+        // Calculate the shift amount
         long offset = Duration.between(newStart, getStartTime()).toHours();
+        // Shift the times back the calculated amount
         data.put("startTime", getStartTime().minusHours(offset).toString());
         data.put("endTime", getEndTime().minusHours(offset).toString());
     }

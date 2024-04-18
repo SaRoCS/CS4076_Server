@@ -10,6 +10,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.time.DayOfWeek;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -25,7 +26,7 @@ public class TCPServer {
      */
     private static final int PORT = 1234;
     /**
-     * An array to store the scheduled classes
+     * A thread-safe hashmap to store the scheduled classes
      */
     private static final ConcurrentHashMap<String, CopyOnWriteArrayList<ModuleWrapper>> schedule = new ConcurrentHashMap<>();
     /**
@@ -34,11 +35,15 @@ public class TCPServer {
     private static ServerSocket servSock;
 
     public static void main(String[] args) {
+        // Initialize schedule with school days
+        for (DayOfWeek day : DayOfWeek.values()) {
+            schedule.put(day.toString(), new CopyOnWriteArrayList<>());
+        }
 
         System.out.println("Opening port...\n");
 
         /*
-            WARNING!!! This is just for demonstration purposes. You store and retrieve the password in a secure way.
+            WARNING!!! This is just for demonstration purposes. You should store and retrieve the password in a secure way.
          */
         char[] password = "cs4076".toCharArray();
 
@@ -58,6 +63,8 @@ public class TCPServer {
         Socket link = null;
         try {
             link = servSock.accept();
+
+            // Pass the connection to a new thread
             Thread worker = new Thread(new ConnectionThread(link, schedule));
             worker.start();
         } catch (IOException e) {
