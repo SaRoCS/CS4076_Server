@@ -1,5 +1,7 @@
 package com.example.cs4076_server;
 
+import javafx.application.Platform;
+
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -39,6 +41,10 @@ public class TCPServer {
         for (DayOfWeek day : DayOfWeek.values()) {
             schedule.put(day.toString(), new CopyOnWriteArrayList<>());
         }
+
+        // To use javafx.concurrent, the JFX runtime must be started
+        Platform.startup(() -> {
+        });
 
         System.out.println("Opening port...\n");
 

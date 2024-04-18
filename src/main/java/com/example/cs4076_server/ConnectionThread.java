@@ -1,6 +1,5 @@
 package com.example.cs4076_server;
 
-import javafx.application.Platform;
 import org.json.simple.JSONObject;
 
 import java.io.IOException;
@@ -38,10 +37,6 @@ class ConnectionThread implements Runnable {
 
     @Override
     public void run() {
-        // To use javafx.concurrent, the JFX runtime must be started
-        Platform.startup(() -> {
-        });
-
         try {
             while (true) {
                 // Get I/O streams for sending and receiving objects
@@ -98,8 +93,6 @@ class ConnectionThread implements Runnable {
                 System.out.println("Unable to disconnect!");
                 System.exit(1);
             }
-            // Stop the JFX runtime
-            Platform.exit();
         }
     }
 
