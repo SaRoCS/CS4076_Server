@@ -105,45 +105,44 @@ class ConnectionThread implements Runnable {
      * @throws IncorrectActionException Thrown when an invalid action-data pair is received
      */
     private String processMsg(String action, JSONObject data) throws IncorrectActionException {
-        String response = "";
-        if (action.equals("Display Schedule")) {
-            response = displaySchedule();
+        String response;
+        switch (action) {
+            case "Display Schedule" -> response = displaySchedule();
+
             //response = "Schedule displayed";
-        } else if (action.equals("Add Class") || action.equals("Remove Class")) {
-            // Class data is required for adding and removing
-            if (data == null) {
-                throw new IncorrectActionException("Cannot " + action + ". Missing data.");
+            case "Add Class", "Remove Class" -> {
+                // Class data is required for adding and removing
+                if (data == null) {
+                    throw new IncorrectActionException("Cannot " + action + ". Missing data.");
+                }
+                ModuleWrapper newModule = new ModuleWrapper(data);
+
+                // Validate that the module ends after it starts
+                if (newModule.getStartTime().isAfter(newModule.getEndTime()) || newModule.getStartTime().equals(newModule.getEndTime())) {
+                    return "Start time must be before end time.";
+                }
+                if (action.equals("Add Class")) {
+                    response = addClass(newModule);
+                } else {
+                    response = removeClass(newModule);
+                }
             }
+            case "Early Lectures" -> {
+                // Create a task using javafx.concurrent to decouple computation
+                EarlyLecturesTask task = new EarlyLecturesTask(schedule);
+                task.setOnSucceeded(e -> {
+                    // Update the status
+                    earlyLectureStatus = "Finished";
+                });
 
-            ModuleWrapper newModule = new ModuleWrapper(data);
-
-            // Validate that the module ends after it starts
-            if (newModule.getStartTime().isAfter(newModule.getEndTime()) || newModule.getStartTime().equals(newModule.getEndTime())) {
-                return "Start time must be before end time.";
+                // Run the task
+                ExecutorService executorService = Executors.newFixedThreadPool(1);
+                executorService.execute(task);
+                executorService.shutdown();
+                earlyLectureStatus = "Started";
+                response = "Early lectures task started";
             }
-
-            if (action.equals("Add Class")) {
-                response = addClass(newModule);
-            } else if (action.equals("Remove Class")) {
-                response = removeClass(newModule);
-            }
-        } else if (action.equals("Early Lectures")) {
-            // Create a task using javafx.concurrent to decouple computation
-            EarlyLecturesTask task = new EarlyLecturesTask(schedule);
-            task.setOnSucceeded(e -> {
-                // Update the status
-                earlyLectureStatus = "Finished";
-            });
-
-            // Run the task
-            ExecutorService executorService = Executors.newFixedThreadPool(1);
-            executorService.execute(task);
-            executorService.shutdown();
-
-            earlyLectureStatus = "Started";
-            response = "Early lectures task started";
-        } else {
-            throw new IncorrectActionException("Unknown action.");
+            default -> throw new IncorrectActionException("Unknown action.");
         }
         return response;
     }
@@ -156,8 +155,10 @@ class ConnectionThread implements Runnable {
         System.out.print("Day         Start       End         Name        Room Number\n");
         System.out.println("-------------------------------------------------------------------");
         for (DayOfWeek day : DayOfWeek.values()) {
-            for (ModuleWrapper module : schedule.get(day.toString())) {
-                System.out.printf("%-12s%-12s%-12s%-12s%-12s\n", module.getDayOfWeek(), module.getStartTime(), module.getEndTime(), module.getName(), module.getRoomNumber());
+            if (!day.equals(DayOfWeek.SATURDAY) && !day.equals(DayOfWeek.SUNDAY)) {
+                for (ModuleWrapper module : schedule.get(day.toString())) {
+                    System.out.printf("%-12s%-12s%-12s%-12s%-12s\n", module.getDayOfWeek(), module.getStartTime(), module.getEndTime(), module.getName(), module.getRoomNumber());
+                }
             }
         }
         System.out.println();

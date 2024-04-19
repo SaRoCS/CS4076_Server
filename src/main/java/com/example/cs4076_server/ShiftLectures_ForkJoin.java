@@ -19,11 +19,11 @@ public class ShiftLectures_ForkJoin extends RecursiveAction {
      */
     private final ConcurrentHashMap<String, CopyOnWriteArrayList<ModuleWrapper>> schedule;
 
-    private int low;
-    private int high;
+    private final int low;
+    private final int high;
 
     public ShiftLectures_ForkJoin(ConcurrentHashMap<String, CopyOnWriteArrayList<ModuleWrapper>> schedule, int low, int high) {
-        this.days = new ArrayList<String>(schedule.keySet());
+        this.days = new ArrayList<>(schedule.keySet());
         this.schedule = schedule;
         this.low = low;
         this.high = high;
@@ -48,15 +48,6 @@ public class ShiftLectures_ForkJoin extends RecursiveAction {
                 i++;
             }
 
-            /*
-
-                SIMULATES LONG PROCESS FOR TESTING REMOVE BEFORE TURNING IN
-
-             */
-            long startTime = System.currentTimeMillis();
-
-            while (System.currentTimeMillis() - startTime < 20000) {
-            }
         } else {
             // Split the work
             int mid = (low + high) / 2;

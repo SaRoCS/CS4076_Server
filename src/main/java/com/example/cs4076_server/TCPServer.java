@@ -39,7 +39,9 @@ public class TCPServer {
     public static void main(String[] args) {
         // Initialize schedule with school days
         for (DayOfWeek day : DayOfWeek.values()) {
-            schedule.put(day.toString(), new CopyOnWriteArrayList<>());
+            if (!day.equals(DayOfWeek.SATURDAY) && !day.equals(DayOfWeek.SUNDAY)) {
+                schedule.put(day.toString(), new CopyOnWriteArrayList<>());
+            }
         }
 
         // To use javafx.concurrent, the JFX runtime must be started
@@ -66,7 +68,7 @@ public class TCPServer {
      * Handles client connections
      */
     private static void run() {
-        Socket link = null;
+        Socket link;
         try {
             link = servSock.accept();
 

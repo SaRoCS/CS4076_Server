@@ -2,7 +2,6 @@ package com.example.cs4076_server;
 
 import javafx.concurrent.Task;
 
-import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ForkJoinPool;
@@ -21,7 +20,7 @@ public class EarlyLecturesTask extends Task<Void> {
     }
 
     @Override
-    protected Void call() throws Exception {
+    protected Void call() {
         shiftLectures();
         return null;
     }
